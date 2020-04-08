@@ -1,6 +1,7 @@
 const staticCacheName = 'site-static';
 const assets = [
   'index.html',
+  'manifest.json',
   'js/app.js',
   'js/ui.js',
   'js/materialize.min.js',
@@ -8,7 +9,7 @@ const assets = [
   'css/materialize.min.css',
   'img/dish.png',
   'https://fonts.googleapis.com/icon?family=Material+Icons',
-  'https://fonts.gstatic.com/s/materialicons/v47/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2'
+  'https://fonts.gstatic.com/s/materialicons/v50/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2'
 ];
 
 // install event
@@ -28,11 +29,21 @@ self.addEventListener('activate', event => {
 });
 
 // fetch event
-self.addEventListener('fetch', event => {
-  //console.log('fetch event', event);
+self.addEventListener('fetch', function(event) {
+  console.log('Fetch event for ', event.request.url);
   event.respondWith(
-  		caches.match(event.request).then( cacheRes => {
-  			return cacheRes || fetch(event.request)
-  		})
-  	);
+    caches.match(event.request).then(function(response) {
+      if (response) {
+        console.log('Found ', event.request.url, ' in cache');
+        return response;
+      }
+      console.log('Network request for ', event.request.url);
+      return fetch(event.request)
+
+    }).catch(function(error) {
+
+      return caches.match('index.html');
+
+    })
+  );
 });
